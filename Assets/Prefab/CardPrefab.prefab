@@ -692,7 +692,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18ae96a516a81f643886e7eb5d174306, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardDisplay
-  cardData: {fileID: 11400000, guid: 7cf604bbed25cc74d811fe0a600d5304, type: 2}
+  cardData: {fileID: 0}
   nameText: {fileID: 1097084584214632541}
   cardImage: {fileID: 3500330773168689094}
   blockText: {fileID: 2607319409016639028}
@@ -762,10 +762,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardMovement
   selectScale: 1.1
   cardPlay: {x: 0, y: 300}
-  playPosition: {x: -100, y: 485}
+  playPosition: {x: 100, y: 485, z: 0}
   glowEffect: {fileID: 6405863540397036610}
   playArrow: {fileID: 6968571901677376873}
   lerpFactor: 0.1
+  cardPlayDivider: 4
+  cardPlayMultiplier: 1
+  needUpdateCardPlayPosition: 1
+  playPositionYDivider: 2
+  playPositionYMultiplier: 1
+  playPositionXDivider: -8
+  playPositionXMultiplier: 1
+  needUpdatePlayPosition: 1
+  arcRenderer: {fileID: 8574619974686666744}
 --- !u!1 &4288634547107333437
 GameObject:
   m_ObjectHideFlags: 0
@@ -1422,6 +1431,8 @@ MonoBehaviour:
   spacing: 40
   arrowAngleAdjustment: 180
   dotsToSkip: 2
+  baseScreenWidth: 1920
+  spacingScale: 0
 --- !u!1 &8043271990051230180
 GameObject:
   m_ObjectHideFlags: 0
