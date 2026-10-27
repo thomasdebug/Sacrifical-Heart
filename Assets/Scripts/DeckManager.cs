@@ -1,57 +1,70 @@
-using Cards;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cards;
 using UnityEngine.SceneManagement;
 
 public class DeckManager : MonoBehaviour
 {
-    public List<Card> allCards = new List<Card>();
+    public List<Card> drawPile = new List<Card>();
+    public List<Card> discardPile = new List<Card>();
 
-    public int startingHandSize = 6;
+    public int startingHandSize = 5;
+    public int cardsPerTurn = 5;
+
+    public List<Card> allCards = new List<Card>();
 
     private int currentIndex = 0;
     public int maxHandSize;
     public int currentHandSize;
-    [SerializeField]private HandManager handManager;
+    [SerializeField] private HandManager handManager;
 
-    void Start()
+    private void Start()
     {
-        //Load all card assets from the Resources folder
-        Card[] cards = Resources.LoadAll<Card>("Cards");
+        if (handManager == null)
+            handManager = FindFirstObjectByType<HandManager>();
 
-        //Add the loaded cards to the allCards list
-        allCards.AddRange(cards);
+        if (handManager == null)
+        {
+            Debug.LogError("HandManager not found!");
+            return;
+        }
 
         HandManager hand = FindHandManagerInActiveScene();
-        maxHandSize = hand.maxHandSize;
-        for (int i = 0; i < startingHandSize; i++)
-        {
-            Debug.Log($"Drawing Card");
-            DrawCard(hand);
-        }
+        Card[] cards = Resources.LoadAll<Card>("Cards");
+        drawPile.AddRange(cards);
+
+        ShuffleDrawPile();
+
+        DrawCards(startingHandSize);
     }
 
-    void Update()
+    public void DrawCards(int amount)
     {
-        if (handManager != null)
+        for (int i = 0; i < amount; i++)
         {
-            currentHandSize = handManager.cardsInHand.Count;
+            // Refill the Draw Pile if needed.
+            if (drawPile.Count == 0)
+            {
+                ShuffleDiscardIntoDrawPile();
+            }
+
+            // Stop if there are no cards left anywhere.
+            if (drawPile.Count == 0)
+            {
+                Debug.Log("No cards left to draw!");
+                return;
+            }
+
+            Card card = drawPile[0];
+            drawPile.RemoveAt(0);
+
+            handManager.AddCardToHand(card);
         }
+
+        Debug.Log("Draw Pile: " + drawPile.Count);
+        Debug.Log("Discard Pile: " + discardPile.Count);
     }
 
-    public void DrawCard(HandManager handManager)
-    {
-        if (allCards.Count == 0)
-            return;
-
-        if (currentHandSize < maxHandSize)
-        {
-            Card nextCard = allCards[currentIndex];
-            handManager.AddCardToHand(nextCard);
-            currentIndex = (currentIndex + 1) % allCards.Count;
-        }
-    }
 
     private HandManager FindHandManagerInActiveScene()
     {
@@ -67,4 +80,71 @@ public class DeckManager : MonoBehaviour
 
         return null;
     }
+
+    public void DrawCard(HandManager handManager)
+    {
+        if (allCards.Count == 0)
+            return;
+
+        if (currentHandSize < maxHandSize)
+        {
+            Card nextCard = allCards[currentIndex];
+            handManager.AddCardToHand(nextCard);
+            currentIndex = (currentIndex + 1) % allCards.Count;
+        }
+    }
+
+
+    public void DiscardHand()
+    {
+        // Copy the list so we can safely remove cards.
+        List<GameObject> cardsToDiscard =
+            new List<GameObject>(handManager.cardsInHand);
+
+        foreach (GameObject cardObject in cardsToDiscard)
+        {
+            if (cardObject == null)
+                continue;
+
+            CardDisplay display = cardObject.GetComponent<CardDisplay>();
+
+            if (display != null && display.cardData != null)
+            {
+                discardPile.Add(display.cardData);
+            }
+
+            Destroy(cardObject);
+        }
+
+        handManager.cardsInHand.Clear();
+
+        Debug.Log("Hand discarded!");
+        Debug.Log("Discard Pile: " + discardPile.Count);
+    }
+
+    private void ShuffleDiscardIntoDrawPile()
+    {
+        if (discardPile.Count == 0)
+            return;
+
+        drawPile.AddRange(discardPile);
+        discardPile.Clear();
+
+        ShuffleDrawPile();
+
+        Debug.Log("Discard Pile shuffled into Draw Pile!");
+    }
+
+    private void ShuffleDrawPile()
+    {
+        for (int i = 0; i < drawPile.Count; i++)
+        {
+            int randomIndex = Random.Range(i, drawPile.Count);
+
+            Card temp = drawPile[i];
+            drawPile[i] = drawPile[randomIndex];
+            drawPile[randomIndex] = temp;
+        }
+    }
 }
+

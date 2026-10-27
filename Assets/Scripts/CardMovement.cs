@@ -83,6 +83,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IPointerDownHandler, IP
                 break;
         }
     }
+
     private void PlayCard()
     {
         if (cardDisplay == null || cardDisplay.cardData == null)
@@ -91,27 +92,47 @@ public class CardMovement : MonoBehaviour, IDragHandler, IPointerDownHandler, IP
             return;
         }
 
-        if (arcRenderer == null)
-        {
-            Debug.LogWarning("ArcRenderer is not assigned!");
-            return;
-        }
-
         Card card = cardDisplay.cardData;
 
-        if (!card.cardType.Contains(Card.CardType.Attack))
+        // ATTACK CARD
+        if (card.cardType.Contains(Card.CardType.Attack))
         {
-            Debug.Log("This card is not an attack.");
+            if (arcRenderer == null)
+            {
+                Debug.LogWarning("ArcRenderer is not assigned!");
+                return;
+            }
+
+            bool hit = arcRenderer.TryHitEnemy(card);
+
+            if (!hit)
+            {
+                Debug.Log("No enemy hit!");
+            }
+
             return;
         }
 
-        bool hit = arcRenderer.TryHitEnemy(card);
-
-        if (!hit)
+        // DEFENSE / BLOCK CARD
+        if (card.cardType.Contains(Card.CardType.Defense))
         {
-            Debug.Log("No enemy hit!");
+            CardCombat cardCombat = FindFirstObjectByType<CardCombat>();
+
+            if (cardCombat == null)
+            {
+                Debug.LogWarning("CardCombat was not found!");
+                return;
+            }
+
+            cardCombat.PlayCard(card, null);
+
+            Debug.Log("Played Block card: " + card.cardName);
+            return;
         }
+
+        Debug.Log("This card has no playable effect yet.");
     }
+
     private void TransitionToState0()
     {
         currentState = 0;

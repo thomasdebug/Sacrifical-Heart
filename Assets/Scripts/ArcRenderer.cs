@@ -82,14 +82,12 @@ public class ArcRenderer : MonoBehaviour
         if (card == null)
             return false;
 
-        // Convert mouse position to world position.
         Vector3 mousePosition = Input.mousePosition;
         mousePosition.z = -Camera.main.transform.position.z;
 
         Vector3 worldPosition =
             Camera.main.ScreenToWorldPoint(mousePosition);
 
-        // Detect a 2D collider at the mouse position.
         Collider2D hit = Physics2D.OverlapPoint(
             new Vector2(worldPosition.x, worldPosition.y)
         );
@@ -102,13 +100,30 @@ public class ArcRenderer : MonoBehaviour
         if (enemy == null)
             return false;
 
-        // Only attack cards deal damage.
         if (!card.cardType.Contains(Card.CardType.Attack))
             return false;
 
+        // Deal damage to the enemy.
         enemy.TakeDamage(card.damage);
 
         Debug.Log($"Played {card.cardName} for {card.damage} damage!");
+
+        // Spawn the Impact VFX at the enemy.
+        CombatVFX combatVFX = FindFirstObjectByType<CombatVFX>();
+
+        if (combatVFX != null)
+        {
+            combatVFX.PlayEffect(
+                combatVFX.impactEffect,
+                enemy.transform.position
+            );
+
+            Debug.Log("Impact VFX spawned at " + enemy.name);
+        }
+        else
+        {
+            Debug.LogWarning("CombatVFX was not found in the scene!");
+        }
 
         return true;
     }
