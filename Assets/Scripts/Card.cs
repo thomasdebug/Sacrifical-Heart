@@ -14,7 +14,7 @@ namespace Cards
         public int block;
         public List<DamageType> damageType;
         public Sprite cardSprite;
-
+        public int energyCost = 1;
         public enum CardType
         {
             Attack,

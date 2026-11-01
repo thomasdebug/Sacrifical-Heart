@@ -7,6 +7,7 @@ public class CardCombat : MonoBehaviour
 {
     public PlayerHealth playerHealth;
     public List<Enemy> enemies = new List<Enemy>();
+    public PlayerEnergy playerEnergy;
 
     public bool isPlayerTurn = true;
     public float timeBetweenAttacks = 0.5f;
@@ -15,42 +16,29 @@ public class CardCombat : MonoBehaviour
 
     public void PlayCard(Card card, Enemy target)
     {
-        if (!isPlayerTurn || card == null)
-            return;
+        if (!isPlayerTurn || card == null) return;
 
-        // Attack cards need an enemy target.
-        if (card.cardType.Contains(Card.CardType.Attack))
+        // Check and use energy
+        if (playerEnergy == null) return;
+
+        if (!playerEnergy.UseEnergy(card.energyCost))
         {
-            if (target == null)
-                return;
-
-            target.TakeDamage(card.damage);
-
-            if (combatVFX != null)
-            {
-                Debug.LogWarning("CombatVFX reference is missing!");
-                combatVFX.PlayEffect(
-                    combatVFX.impactEffect,
-                    target.transform.position
-                );
-            }
-            else
-            {
-                Debug.LogWarning("CombatVFX reference is missing!");
-            }
+            return;
         }
 
-        // Defense cards do not need an enemy target.
+        if (card.cardType.Contains(Card.CardType.Attack))
+        {
+            if (target == null) return;
+
+            target.TakeDamage(card.damage);
+        }
+
         if (card.cardType.Contains(Card.CardType.Defense))
         {
-            if (playerHealth == null)
-            {
-                Debug.LogError("PlayerHealth is not assigned in CardCombat!");
-                return;
-            }
+            if (playerHealth == null) return;
 
             playerHealth.AddBlock(card.block);
-            
+
             if (combatVFX != null)
             {
                 combatVFX.PlayEffect(
@@ -58,7 +46,6 @@ public class CardCombat : MonoBehaviour
                     playerHealth.transform.position
                 );
             }
-            Debug.Log("Played defense card: " + card.cardName);
         }
     }
 
@@ -110,6 +97,11 @@ public class CardCombat : MonoBehaviour
             if (deckManager != null)
             {
                 deckManager.DrawCards(deckManager.cardsPerTurn);
+            }
+
+            if (playerEnergy != null)
+            {
+                playerEnergy.ResetEnergy();
             }
 
             isPlayerTurn = true;

@@ -18,3 +18,4 @@ MonoBehaviour:
   block: 5
   damageType: 00000000
   cardSprite: {fileID: 0}
+  energyCost: 1

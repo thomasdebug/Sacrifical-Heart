@@ -94,6 +94,25 @@ public class CardMovement : MonoBehaviour, IDragHandler, IPointerDownHandler, IP
 
         Card card = cardDisplay.cardData;
 
+        CardCombat cardCombat = FindFirstObjectByType<CardCombat>();
+
+        if (cardCombat == null || cardCombat.playerEnergy == null)
+        {
+            Debug.LogWarning("CardCombat or PlayerEnergy not found!");
+            return;
+        }
+
+        if (cardCombat.playerEnergy.currentEnergy < card.energyCost)
+        {
+            Debug.Log("Not enough energy!");
+            return;
+        }
+
+        if (!cardCombat.playerEnergy.UseEnergy(card.energyCost))
+        {
+            return;
+        }
+
         // ATTACK CARD
         if (card.cardType.Contains(Card.CardType.Attack))
         {
@@ -116,7 +135,6 @@ public class CardMovement : MonoBehaviour, IDragHandler, IPointerDownHandler, IP
         // DEFENSE / BLOCK CARD
         if (card.cardType.Contains(Card.CardType.Defense))
         {
-            CardCombat cardCombat = FindFirstObjectByType<CardCombat>();
 
             if (cardCombat == null)
             {

@@ -5,7 +5,7 @@ public class PlayerHealth : MonoBehaviour
 {
     public int maxHealth = 50;
     public int currentHealth;
-
+    public DeathScreen deathScreen;
     public int currentBlock = 0;
 
     private void Awake()
@@ -98,7 +98,7 @@ public class PlayerHealth : MonoBehaviour
                 vfx.playerDeathEffect,
                 transform.position
             );
+            deathScreen.ShowDeathScreen();
         }
-
     }
 }

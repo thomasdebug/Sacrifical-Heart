@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cards;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class DeckManager : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class DeckManager : MonoBehaviour
     public int maxHandSize;
     public int currentHandSize;
     [SerializeField] private HandManager handManager;
+
+    public TMP_Text drawPileText;
+    public TMP_Text discardPileText;
 
     private void Start()
     {
@@ -36,6 +40,7 @@ public class DeckManager : MonoBehaviour
         ShuffleDrawPile();
 
         DrawCards(startingHandSize);
+        UpdatePileUI();
     }
 
     public void DrawCards(int amount)
@@ -46,6 +51,7 @@ public class DeckManager : MonoBehaviour
             if (drawPile.Count == 0)
             {
                 ShuffleDiscardIntoDrawPile();
+                UpdatePileUI();
             }
 
             // Stop if there are no cards left anywhere.
@@ -61,11 +67,17 @@ public class DeckManager : MonoBehaviour
             handManager.AddCardToHand(card);
         }
 
+        UpdatePileUI();
+
         Debug.Log("Draw Pile: " + drawPile.Count);
         Debug.Log("Discard Pile: " + discardPile.Count);
     }
 
-
+    public void UpdatePileUI()
+    {
+        drawPileText.text = "" + drawPile.Count;
+        discardPileText.text = "" + discardPile.Count;
+    }
     private HandManager FindHandManagerInActiveScene()
     {
         var scene = SceneManager.GetActiveScene();
@@ -117,6 +129,8 @@ public class DeckManager : MonoBehaviour
         }
 
         handManager.cardsInHand.Clear();
+
+        UpdatePileUI();
 
         Debug.Log("Hand discarded!");
         Debug.Log("Discard Pile: " + discardPile.Count);

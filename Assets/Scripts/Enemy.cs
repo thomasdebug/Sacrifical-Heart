@@ -4,12 +4,20 @@ public class Enemy : MonoBehaviour
 {
     public int maxHealth = 30;
     public int currentHealth = 30;
-
+    public EnemyIntentUI intentUI;
     public int attackDamage = 5;
-
+    private EnemyManager enemyManager;
+    private bool isDead = false;
     private void Awake()
     {
         currentHealth = maxHealth;
+    }
+
+    private void Start()
+    {
+        enemyManager = FindFirstObjectByType<EnemyManager>();
+        enemyManager.RegisterEnemy();
+        UpdateIntentUI();
     }
 
     public void TakeDamage(int damage)
@@ -26,7 +34,10 @@ public class Enemy : MonoBehaviour
             Die();
         }
     }
-
+    public void UpdateIntentUI()
+    {
+        intentUI.UpdateIntent(attackDamage);
+    }
     public void AttackPlayer(PlayerHealth player)
     {
         if (player == null || currentHealth <= 0) return;
@@ -35,9 +46,14 @@ public class Enemy : MonoBehaviour
         player.TakeDamage(attackDamage);
     }
 
-    private void Die()
+    public void Die()
     {
-        Debug.Log($"{gameObject.name} was defeated!");
+        if (isDead) return;
+
+        isDead = true;
+
+        enemyManager.EnemyDefeated();
+
         Destroy(gameObject);
     }
 }
